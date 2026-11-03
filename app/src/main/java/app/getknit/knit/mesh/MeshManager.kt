@@ -5607,7 +5607,8 @@ class MeshManager(
                     "reAcksSkipped=${s.receipts.receiptsReAckSkipped} " +
                     "dmSealedV3=${s.seals.dmSealedV3} ticksUnsigned=${s.receipts.ticksUnsigned} " +
                     "reactionsSealed=${s.seals.reactionsSealed}/${s.seals.reactionsSealedFallback} " +
-                    "filesNan=${s.files.filesSentNan} filesBt=${s.files.filesSentBt} bulkTimeouts=${s.nan.nanBulkGraceTimeouts}",
+                    "filesNan=${s.files.filesSentNan} filesHop=${s.files.filesSentHop} filesBt=${s.files.filesSentBt} " +
+                    "bulkTimeouts=${s.nan.nanBulkGraceTimeouts}",
             )
             // The contribution ledger banks its deltas on the same tick: one DataStore write a minute at most.
             ledger.flush()

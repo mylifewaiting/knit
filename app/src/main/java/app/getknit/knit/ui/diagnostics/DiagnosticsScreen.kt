@@ -100,6 +100,7 @@ import app.getknit.knit.mesh.bluetooth.PromotionConfig
 import app.getknit.knit.mesh.lora.LoraPlane
 import app.getknit.knit.mesh.spool.SpoolStatus
 import app.getknit.knit.mesh.spool.SpoolUrl
+import app.getknit.knit.mesh.wifihop.HopMode
 import app.getknit.knit.transfer.HostVerdict
 import app.getknit.knit.ui.DeviceSupervision
 import app.getknit.knit.ui.Reach
@@ -138,6 +139,7 @@ fun DiagnosticsScreen(
     val moderationLatched by viewModel.moderationLatched.collectAsStateWithLifecycle()
     val bleLinkCap by viewModel.bleLinkCap.collectAsStateWithLifecycle()
     val nanOff by viewModel.nanOff.collectAsStateWithLifecycle()
+    val wifiHopMode by viewModel.wifiHopMode.collectAsStateWithLifecycle()
     val wifiAwareOn by viewModel.wifiAwareOn.collectAsStateWithLifecycle()
     val directCallsOff by viewModel.directCallsOff.collectAsStateWithLifecycle()
     val walkieClips by viewModel.walkieClips.collectAsStateWithLifecycle()
@@ -224,6 +226,9 @@ fun DiagnosticsScreen(
         nanSwitchOffered = viewModel.nanSwitchOffered,
         nanOff = nanOff,
         onSetNanOff = viewModel::setNanOff,
+        wifiHopOffered = viewModel.wifiHopOffered,
+        wifiHop = wifiHopMode,
+        onSetWifiHop = viewModel::setWifiHopMode,
         wifiAwareOff = !wifiAwareOn,
         directCallsSwitchOffered = viewModel.directCallsSwitchOffered,
         directCallsOff = directCallsOff,
@@ -296,6 +301,10 @@ internal fun DiagnosticsScreenContent(
     nanSwitchOffered: Boolean = false,
     nanOff: Boolean = false,
     onSetNanOff: (Boolean) -> Unit = {},
+    // Wi-Fi hop (ADR 2026-11.tz2v). Defaulted off: previews and a phone that already has Aware in a release build.
+    wifiHopOffered: Boolean = false,
+    wifiHop: HopMode = HopMode.OFF,
+    onSetWifiHop: (HopMode) -> Unit = {},
     // The person's Settings › Wi-Fi Aware switch is off (GitHub #44): that row's switched-off tag names it.
     wifiAwareOff: Boolean = false,
     // The debug-only Wi-Fi Direct calls switch, defaulted off likewise: [directCallsOff] true sends calls over ICE.
@@ -398,13 +407,21 @@ internal fun DiagnosticsScreenContent(
             }
 
             item { SectionHeader(stringResource(R.string.diagnostics_transports)) }
-            item { TransportsSection(state.transports, nanOff = nanSwitchOffered && nanOff, wifiAwareOff = wifiAwareOff) }
+            // A release build that already has Wi-Fi Aware does not show an idle hop row.
+            val shownTransports =
+                state.transports.filter { row ->
+                    wifiHopOffered || row !is TransportRow.Live || row.kind != TransportKind.WifiHop
+                }
+            item { TransportsSection(shownTransports, nanOff = nanSwitchOffered && nanOff, wifiAwareOff = wifiAwareOff) }
             // Under the rows it explains: the one plane that can put itself on hold says so with the way back.
             if (state.transports.any { it is TransportRow.Live && it.status.initiatorHeld }) {
                 item { InitiatorHoldSection(onRelease = onReleaseInitiatorHold) }
             }
             if (bleLinkCapOffered && state.transports.any { it is TransportRow.Live && it.kind == TransportKind.Bluetooth }) {
                 item { BleLinkCapRow(cap = bleLinkCap, onSet = onSetBleLinkCap) }
+            }
+            if (wifiHopOffered && state.transports.any { it is TransportRow.Live && it.kind == TransportKind.WifiHop }) {
+                item { WifiHopModeRow(mode = wifiHop, onSet = onSetWifiHop) }
             }
             if (nanSwitchOffered && state.transports.any { it is TransportRow.Live && it.kind == TransportKind.WifiAware }) {
                 item {
@@ -993,6 +1010,7 @@ private fun transportName(kind: TransportKind): String =
         when (kind) {
             TransportKind.Bluetooth -> R.string.diagnostics_transport_bluetooth
             TransportKind.WifiAware -> R.string.diagnostics_transport_wifi_aware
+            TransportKind.WifiHop -> R.string.diagnostics_transport_wifi_hop
             TransportKind.LoRa -> R.string.diagnostics_transport_lora
             TransportKind.Other -> R.string.diagnostics_transport_other
             TransportKind.DirectLink -> R.string.diagnostics_transport_direct_link
@@ -1020,6 +1038,7 @@ private fun transportTag(
     val parts =
         buildList {
             if (TransportKind.Bluetooth in transports) add(ble)
+            if (TransportKind.WifiHop in transports) add(stringResource(R.string.diagnostics_tag_hop))
             if (TransportKind.WifiAware in transports) add(nan)
             if (TransportKind.LoRa in transports) add(lora)
             if (viaSpool) add(spool)
@@ -1605,6 +1624,45 @@ private val BLE_PHY_MODES =
         CodedPhyMode.CODED to R.string.diagnostics_ble_phy_coded,
         CodedPhyMode.ONE_M to R.string.diagnostics_ble_phy_one_m,
     )
+
+/** Wi-Fi hop mode (ADR 2026-11.tz2v). The plane reads the same setting and applies it without a restart. */
+@Composable
+private fun WifiHopModeRow(
+    mode: HopMode,
+    onSet: (HopMode) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).testTag("wifi_hop_mode")) {
+        Text(
+            text = stringResource(R.string.diagnostics_hop_label),
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+        )
+        Text(
+            text = stringResource(R.string.diagnostics_hop_body),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 2.dp, bottom = 8.dp),
+        )
+        ChoiceButtons(
+            choices =
+                listOf(
+                    HopMode.OFF to stringResource(R.string.diagnostics_hop_off),
+                    HopMode.STAR to stringResource(R.string.diagnostics_hop_star),
+                    HopMode.RELAY to stringResource(R.string.diagnostics_hop_relay),
+                ),
+            selected = mode,
+            onSelect = onSet,
+            check = false,
+            tagOf = { mode ->
+                when (mode) {
+                    HopMode.OFF -> "wifi_hop_off"
+                    HopMode.STAR -> "wifi_hop_star"
+                    HopMode.RELAY -> "wifi_hop_relay"
+                }
+            },
+        )
+    }
+}
 
 /**
  * The BLE Coded PHY experiment's mode (`SettingsStore.debugBlePhyMode`, ADR 2026-10.yvn6), so a walk test can switch

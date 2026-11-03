@@ -762,6 +762,7 @@ class InboundPipeline(
             kind == TransportKind.LoRa -> DeliveryPlane.LoRa
             kind == TransportKind.Bluetooth -> DeliveryPlane.Bluetooth
             kind == TransportKind.WifiAware -> DeliveryPlane.WifiAware
+            kind == TransportKind.WifiHop -> DeliveryPlane.WifiHop
             kind == TransportKind.DirectLink -> DeliveryPlane.DirectLink
             else -> DeliveryPlane.Nearby
         }

@@ -40,6 +40,7 @@
                 <action android:name="app.getknit.knit.debug.AWARE" />
                 <action android:name="app.getknit.knit.debug.BLECAP" />
                 <action android:name="app.getknit.knit.debug.NANOFF" />
+                <action android:name="app.getknit.knit.debug.WIFIHOP" />
                 <action android:name="app.getknit.knit.debug.LOWPOWER" />
                 <action android:name="app.getknit.knit.debug.PHY" />
                 <action android:name="app.getknit.knit.debug.LINKTUNE" />

@@ -1131,6 +1131,7 @@
     <string name="diagnostics_none_transports">Немає активних каналів зв’язку</string>
     <string name="diagnostics_transport_bluetooth">Bluetooth</string>
     <string name="diagnostics_transport_wifi_aware">Wi-Fi Aware</string>
+    <string name="diagnostics_transport_wifi_hop">Wi-Fi hop</string>
     <string name="diagnostics_transport_other">Інше</string>
     <string name="diagnostics_transport_lora">LoRa</string>
     <string name="diagnostics_transport_direct_link">Пряме з’єднання</string>
@@ -1147,6 +1148,7 @@
     <string name="diagnostics_transport_lora_down">Плату не підключено</string>
     <string name="diagnostics_tag_ble">BLE</string>
     <string name="diagnostics_tag_nan">NAN</string>
+    <string name="diagnostics_tag_hop">Hop</string>
     <string name="diagnostics_tag_lora">LoRa</string>
     <string name="diagnostics_tag_spool">Інтернет</string>
     <string name="diagnostics_tag_via">через %1$s</string>
@@ -1163,6 +1165,11 @@
     <string name="diagnostics_ble_link_cap_increase">Більше з’єднань Bluetooth</string>
     <string name="diagnostics_nan_switch_label">Wi-Fi Aware (налагодження)</string>
     <string name="diagnostics_nan_switch_body">Вимкніть, щоб mesh-мережа працювала лише через Bluetooth. Залишається вимкненим після перезапуску, доки ви не ввімкнете знову.</string>
+    <string name="diagnostics_hop_label">Wi-Fi hop</string>
+    <string name="diagnostics_hop_body">Передає трафік mesh-мережі через Wi-Fi Direct на телефонах без Wi-Fi Aware. Зірка тримає одну групу, поки поруч є телефони з Wi-Fi hop. Реле чергує з’єднання, щоб телефон посередині передавав повідомлення далі. Передавання файлу або виклик забирає радіо назад.</string>
+    <string name="diagnostics_hop_off">Вимкнено</string>
+    <string name="diagnostics_hop_star">Зірка</string>
+    <string name="diagnostics_hop_relay">Реле</string>
     <string name="diagnostics_direct_calls_switch_label">Дзвінки через Wi-Fi Direct (налагодження)</string>
     <string name="diagnostics_direct_calls_switch_body">Вимкніть, щоб дзвінки з телефоном поруч ішли інтернет-шляхом, через STUN і TURN, ніби він далеко. Діє з наступного дзвінка й залишається вимкненим, доки ви не ввімкнете знову.</string>
     <string name="diagnostics_walkie_clips_label">Зберігати записи рації (налагодження)</string>

@@ -1,5 +1,10 @@
 package app.getknit.knit.transfer
 
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.withTimeoutOrNull
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicReference
 
@@ -18,8 +23,18 @@ import java.util.concurrent.atomic.AtomicReference
 class DirectWifiLease(
     private val radio: DirectWifi,
     private val gate: HostGate = HostGate.Open,
+    private val yieldWaitMs: Long = YIELD_WAIT_MS,
 ) {
     private val holder = AtomicReference<String?>(null)
+
+    // Bumped when a transfer or a call asks the Wi-Fi hop plane to drop its group (ADR 2026-11.tz2v).
+    private val yieldTick = MutableStateFlow(0)
+
+    /**
+     * Increments when someone other than [HOP] wants the radio and the hop plane holds it. The hop plane
+     * collects this and releases; [host] and [join] then wait out [yieldWaitMs] for that release.
+     */
+    val yields: StateFlow<Int> = yieldTick.asStateFlow()
 
     // Whether the gate was told a group of ours is up, so the release that takes it down tells it back, once.
     private val hostingTold = AtomicBoolean(false)
@@ -53,6 +68,7 @@ class DirectWifiLease(
             timeoutMs: Long,
         ): HostedGroup {
             if (!mayHost()) throw cannotHost()
+            yieldHop(owner)
             take()
             // After take(): a host refused Busy must leave no marker, since its release is a no-op for this owner.
             if (!gate.hosting()) throw cannotHost()
@@ -65,6 +81,7 @@ class DirectWifiLease(
             attemptMs: Long,
             ipv4: Boolean,
         ): JoinedGroup {
+            yieldHop(owner)
             take()
             return radio.join(credentials, attemptMs, ipv4)
         }
@@ -85,10 +102,30 @@ class DirectWifiLease(
         }
     }
 
+    /**
+     * The hop plane holds the radio until it is asked. A transfer or a call waits for that release instead of
+     * failing [TransferRefusal.Busy] at once (ADR 2026-11.tz2v). The hop plane itself never waits on its own ask.
+     */
+    private suspend fun yieldHop(requester: String) {
+        if (requester == HOP || holder.get() != HOP) return
+        yieldTick.value = yieldTick.value + 1
+        withTimeoutOrNull(yieldWaitMs) {
+            while (holder.get() == HOP) delay(YIELD_POLL_MS)
+        }
+    }
+
     private fun cannotHost() = DirectWifiException("this phone does not host Wi-Fi Direct groups", TransferRefusal.CannotHost)
 
     companion object {
         /** The owner name the file transfer holds the radio under; a call holds it under its call id. */
         const val TRANSFER = "transfer"
+
+        /** The owner name the Wi-Fi hop plane holds the radio under (ADR 2026-11.tz2v). */
+        const val HOP = "wifihop"
+
+        /** How long a transfer or a call waits for the hop plane to drop its group. */
+        const val YIELD_WAIT_MS = 12_000L
+
+        private const val YIELD_POLL_MS = 50L
     }
 }

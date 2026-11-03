@@ -51,6 +51,10 @@ before changing behaviour — this file is the map, they are the reasoning.
 
 ## What will bite you
 
+- **The Wi-Fi hop plane can already hold this radio.** When it does (`DirectWifiLease` owner `wifihop`,
+  ADR 2026-11.tz2v), a transfer or a call does not fail `Busy` at once: the lease asks the hop to drop its
+  group and waits for that release. The hop's own `MeshTransport.pause()` does nothing, because the pause
+  `host()` triggers is the Aware hand-over and runs on the same stack.
 - **Wi-Fi Aware must be paused explicitly.** On Android 12+ our own P2P does *not* evict our own NAN session
   — same-app interface requests have equal priority — so `createGroup` returns `BUSY` while Aware is
   attached, and `WifiAwareManager.isAvailable()` stays true the whole time. There is no availability edge to

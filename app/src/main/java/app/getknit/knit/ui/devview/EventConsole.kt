@@ -119,6 +119,7 @@ enum class ConsolePlane(
             when (kind) {
                 TransportKind.Bluetooth -> Bluetooth
                 TransportKind.WifiAware -> WifiAware
+                TransportKind.WifiHop -> WifiAware
                 TransportKind.LoRa -> LoRa
                 TransportKind.Other -> Mesh
                 TransportKind.DirectLink -> Link

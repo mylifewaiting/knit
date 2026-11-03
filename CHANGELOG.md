@@ -22,6 +22,8 @@ document:
 
 ### Added
 
+- Phones without Wi-Fi Aware can carry nearby messages over Wi-Fi Direct. Turn Wi-Fi hop on in
+  Diagnostics: Star for phones together, Relay for a line of three.
 - In the US, Australia and New Zealand, you can now set a LoRa board up on a frequency only Knit boards use.
   Knit then uses the full airtime your region allows, but other people's Meshtastic radios no longer pass
   your messages on.

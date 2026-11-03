@@ -1,5 +1,7 @@
 package app.getknit.knit.transfer
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -113,5 +115,21 @@ class DirectWifiLeaseTest {
             transfer.release()
             call.sweep()
             assertEquals(1, radio.swept.size)
+        }
+
+    @Test
+    fun aTransferWaitsForTheHopHolderToLetGo() =
+        runBlocking {
+            val shared = DirectWifiLease(radio, yieldWaitMs = 1_000L)
+            val hop = shared.leasedTo(DirectWifiLease.HOP)
+            val sender = shared.leasedTo(DirectWifiLease.TRANSFER)
+            hop.host(GroupCredentials.random(), 1_000L)
+            val hosted = async { sender.host(GroupCredentials.random(), 1_000L) }
+            while (shared.yields.value == 0) delay(10)
+            hop.release()
+            hosted.await()
+            assertEquals(DirectWifiLease.TRANSFER, shared.owner)
+            sender.release()
+            assertNull(shared.owner)
         }
 }

@@ -21,6 +21,7 @@ import app.getknit.knit.identity.Identity
 import app.getknit.knit.identity.displayNameFor
 import app.getknit.knit.mesh.MeshController
 import app.getknit.knit.mesh.MeshMetrics
+import app.getknit.knit.mesh.PlaneSupport
 import app.getknit.knit.mesh.RadioSupport
 import app.getknit.knit.mesh.RelayedHeard
 import app.getknit.knit.mesh.TransportHealth
@@ -34,6 +35,7 @@ import app.getknit.knit.mesh.lora.LoraFacts
 import app.getknit.knit.mesh.lora.LoraPlane
 import app.getknit.knit.mesh.spool.SpoolStatus
 import app.getknit.knit.mesh.spool.spoolPresentPeers
+import app.getknit.knit.mesh.wifihop.HopMode
 import app.getknit.knit.moderation.ModelLoadGuard
 import app.getknit.knit.transfer.DirectHostGuard
 import app.getknit.knit.transfer.HostVerdict
@@ -236,6 +238,22 @@ class DiagnosticsViewModel(
     fun setBleLinkCap(cap: Int) {
         if (!bleLinkCapOffered) return
         viewModelScope.launch { settings.setDebugBleLinkCap(cap) }
+    }
+
+    /**
+     * Whether this build offers the Wi-Fi hop control (ADR 2026-11.tz2v): every debug build, and a release
+     * build whose phone has no Wi-Fi Aware. That is the phone the plane is for.
+     */
+    val wifiHopOffered: Boolean = BuildConfig.DEBUG || radios.wifiAware != PlaneSupport.Supported
+
+    /** The hop mode, applied by the Wi-Fi hop plane without a restart. */
+    val wifiHopMode: StateFlow<HopMode> =
+        settings.wifiHopMode.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HopMode.OFF)
+
+    /** Sets the hop mode. A no-op where the control is not offered. */
+    fun setWifiHopMode(mode: HopMode) {
+        if (!wifiHopOffered) return
+        viewModelScope.launch { settings.setWifiHopMode(mode) }
     }
 
     /** Whether this build offers the Wi-Fi Aware switch — debug builds only. */

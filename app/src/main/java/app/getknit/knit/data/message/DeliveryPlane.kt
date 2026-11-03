@@ -43,6 +43,12 @@ enum class DeliveryPlane(
 
     /** A contact's direct Internet link (`mesh/inet/DirectLinkTransport`, ADR 2026-10.a5yj): no spool, no radio. */
     DirectLink(6),
+
+    /**
+     * A Wi-Fi Direct hop (ADR 2026-11.tz2v): the same nearby face as Wi-Fi Aware, recorded apart so a developer
+     * can tell which radio carried the frame. A phone radio, so it is [shortRange].
+     */
+    WifiHop(7),
     ;
 
     /**
@@ -56,7 +62,7 @@ enum class DeliveryPlane(
      * attachment push *feeds*, so an ack that rode it is the opposite of evidence the radios coped. [DirectLink] is
      * false because it is no radio: it is the composite's long-range child, as the spool's plane is. Whether a plane proves a hold of bytes is [provesHold].
      */
-    val shortRange: Boolean get() = this == Nearby || this == Bluetooth || this == WifiAware
+    val shortRange: Boolean get() = this == Nearby || this == Bluetooth || this == WifiAware || this == WifiHop
 
     /**
      * Whether bytes learnt over this plane prove their holder has them (ADR 2026-10.vy27): a [shortRange] radio, or a

@@ -98,6 +98,8 @@ import app.getknit.knit.mesh.spool.SpoolDialer
 import app.getknit.knit.mesh.spool.TicketIssuer
 import app.getknit.knit.mesh.wear.WearStatusSource
 import app.getknit.knit.mesh.wifiaware.WifiAwareTransport
+import app.getknit.knit.mesh.wifihop.HopMode
+import app.getknit.knit.mesh.wifihop.WifiHopTransport
 import app.getknit.knit.moderation.modelGuardStamp
 import app.getknit.knit.net.AndroidInternetGate
 import app.getknit.knit.net.AndroidPublicSpoolDirectory
@@ -245,11 +247,14 @@ val meshModule =
                     } else {
                         MutableStateFlow(true)
                     }
+                // Wi-Fi hop (ADR 2026-11.tz2v): off until Diagnostics sets it. The advert bit and the plane read one flow.
+                val hopMode = get<SettingsStore>().wifiHopMode.stateIn(get(), SharingStarted.Eagerly, HopMode.OFF)
+                val hopOn = hopMode.map { it != HopMode.OFF }.stateIn(get(), SharingStarted.Eagerly, false)
                 val children =
                     buildList {
                         // Held for Wi-Fi Aware's ICM rule (GitHub #44): its audio monitor is the one A2DP signal we have.
                         var bluetooth: BluetoothMeshTransport? = null
-                        // Descending send-preference: Bluetooth (persistent links) first, then Wi-Fi Aware (ephemeral).
+                        // Descending send-preference: a live Wi-Fi hop link, then Bluetooth, then Wi-Fi Aware.
                         if (BluetoothMeshTransport.isSupported(ctx)) {
                             // The side channel is the one seam its flag gates: null keeps every page dark.
                             val sideChannel =
@@ -285,10 +290,27 @@ val meshModule =
                                     awareWontRun = awareWontRunHere,
                                     claims = get(),
                                     prover = get(),
+                                    wifiHopAdvert = hopOn,
                                 )
                             bluetooth = bt
-                            add(bt)
                         }
+                        // Ahead of Bluetooth so a live hop socket carries the frame. With no socket, the later planes do.
+                        add(
+                            WifiHopTransport(
+                                leaseOf = { get<DirectWifiLease>() },
+                                mode = hopMode,
+                                hopPeers = bluetooth?.wifiHopPeers ?: MutableStateFlow(emptySet()),
+                                selfId = { get<Identity>().nodeId() },
+                                scope = get(),
+                                metrics = get(),
+                                partials = get(),
+                                claims = get(),
+                                prover = get(),
+                                cacheDir = androidContext().cacheDir,
+                                log = { msg -> Log.i("WifiHop", msg) },
+                            ),
+                        )
+                        bluetooth?.let { add(it) }
                         // The explicit SDK_INT guard — redundant with awareSupported — is what lint reads to clear the
                         // @RequiresApi constructor call on this pre-31-reachable line.
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && awareSupported) {
