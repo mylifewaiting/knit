@@ -1110,6 +1110,7 @@
     <string name="diagnostics_none_transports">Nenhum transporte ativo</string>
     <string name="diagnostics_transport_bluetooth">Bluetooth</string>
     <string name="diagnostics_transport_wifi_aware">Wi-Fi Aware</string>
+    <string name="diagnostics_transport_wifi_hop">Wi-Fi hop</string>
     <string name="diagnostics_transport_other">Outro</string>
     <string name="diagnostics_transport_lora">LoRa</string>
     <string name="diagnostics_transport_direct_link">Link direto</string>
@@ -1125,6 +1126,7 @@
     <string name="diagnostics_transport_lora_down">Placa não conectada</string>
     <string name="diagnostics_tag_ble">BLE</string>
     <string name="diagnostics_tag_nan">NAN</string>
+    <string name="diagnostics_tag_hop">Hop</string>
     <string name="diagnostics_tag_lora">LoRa</string>
     <string name="diagnostics_tag_spool">Internet</string>
     <string name="diagnostics_tag_via">via %1$s</string>
@@ -1141,6 +1143,11 @@
     <string name="diagnostics_ble_link_cap_increase">Mais links Bluetooth</string>
     <string name="diagnostics_nan_switch_label">Wi-Fi Aware (debug)</string>
     <string name="diagnostics_nan_switch_body">Desative para rodar a mesh só com Bluetooth. Continua desativado depois de reiniciar, até você ativar de novo.</string>
+    <string name="diagnostics_hop_label">Wi-Fi hop</string>
+    <string name="diagnostics_hop_body">Leva o tráfego da mesh por Wi-Fi Direct em telefones sem Wi-Fi Aware. Estrela mantém um grupo enquanto há telefones com Wi-Fi hop por perto. Revezamento alterna os links para um telefone no meio repassar as mensagens. Uma transferência de arquivo ou uma chamada devolve o rádio.</string>
+    <string name="diagnostics_hop_off">Desligado</string>
+    <string name="diagnostics_hop_star">Estrela</string>
+    <string name="diagnostics_hop_relay">Revezamento</string>
     <string name="diagnostics_direct_calls_switch_label">Chamadas por Wi-Fi Direct (debug)</string>
     <string name="diagnostics_direct_calls_switch_body">Desative para fazer chamadas com um celular por perto pelo caminho da internet, STUN e TURN, como se ele estivesse longe. Vale a partir da próxima chamada e continua desativado até você ativar de novo.</string>
     <string name="diagnostics_walkie_clips_label">Salvar clipes do walkie (debug)</string>

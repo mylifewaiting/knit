@@ -35,7 +35,7 @@ fun radioWarningFor(statuses: List<TransportStatus>): RadioWarning? {
 
         TransportKind.Bluetooth in off -> RadioWarning.BluetoothOff
 
-        TransportKind.WifiAware in off -> RadioWarning.WifiOff
+        TransportKind.WifiAware in off || TransportKind.WifiHop in off -> RadioWarning.WifiOff
 
         else -> null // only an unnamed ("Other") radio is off while a named one is up — nothing actionable
     }

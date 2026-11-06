@@ -157,7 +157,7 @@ class BleAdvertPayloadTest {
 
     @Test
     fun theAwareBitIsSetOnlyWhenAware() {
-        // Bit layout only: aware=true adds bit 2 alone, aware=false sets neither bit 2 nor bit 3. The polarity's
+        // Bit layout only: aware=true adds bit 2 alone. Bit 3 is FLAG_WIFI_HOP and stays clear here. The polarity's
         // regression pins are AwareCandidateTrackerTest's (a clear bit is no candidate) and AwareFlagTest's.
         for (side in listOf(false, true)) {
             for (gatt in listOf(false, true)) {
@@ -165,9 +165,25 @@ class BleAdvertPayloadTest {
                 val on = BleAdvertPayload.flags(sideLive = side, gattPeers = gatt, aware = true)
                 assertEquals("flags($side, $gatt, false)", 0, off and 0x0C)
                 assertEquals("flags($side, $gatt, true)", 0x04, on xor off)
-                assertEquals("bits 3..7 stay reserved", 0, on and 0xF8)
+                assertEquals("bits 4..7 stay clear when hop is off", 0, on and 0xF0)
             }
         }
+    }
+
+    @Test
+    fun theWifiHopBitIsBit3AndItsOwn() {
+        // ADR 2026-11.tz2v: bit 3 alone, and it does not move the Aware bit.
+        assertEquals(0x08, BleAdvertPayload.FLAG_WIFI_HOP)
+        val hop = BleAdvertPayload.flags(sideLive = false, gattPeers = false, aware = false, wifiHop = true)
+        assertEquals(BleAdvertPayload.FLAG_WIFI_HOP, hop)
+        val both = BleAdvertPayload.flags(sideLive = true, gattPeers = false, aware = true, wifiHop = true)
+        assertEquals(0x0D, both)
+        val parsed = BleAdvertPayload.parse(BleAdvertPayload.encode(nodeA, 0L, 0L, 1, both))!!
+        assertTrue(parsed.wifiHop)
+        assertTrue(parsed.aware)
+        assertTrue(parsed.sideChannel)
+        val off = BleAdvertPayload.parse(BleAdvertPayload.encode(nodeA, 0L, 0L, 1, 0x07))!!
+        assertFalse(off.wifiHop)
     }
 
     @Test

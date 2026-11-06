@@ -66,7 +66,8 @@ Features and surfaces:
 - **Direct Internet links** (`mesh/inet/`, the `link` signal, `CAP_INET_LINK`, `BuildConfig.DIRECT_LINKS`): READ
   `.agents/context/direct-links.md`.
 - **Wi-Fi Direct transfer** (`transfer/`, `MeshTransport.pause` / `resume`, the shared radio lease): READ
-  `.agents/context/direct-transfer.md`.
+ `.agents/context/direct-transfer.md`.
+- **Wi-Fi hop** (`mesh/wifihop/`, Diagnostics Wi-Fi hop, `FLAG_WIFI_HOP`): READ `.agents/context/wifi-hop.md`.
 - **Mesh service and power** (`MeshService`, pause, foreground types, heal, low power, `PowerPolicy`): READ
   `.agents/context/service.md`.
 - **Messages and attachments** (composer, drafts, formatting, quotes, link previews and `net/`, location, images,

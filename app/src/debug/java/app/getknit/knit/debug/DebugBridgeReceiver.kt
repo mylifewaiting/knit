@@ -323,6 +323,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
  *   collects the key, so a lower cap sheds the weakest links once they are 20 s old and refuses new inbound dialers;
  *   the side channel still reaches unlinked peers. Persists across restarts until cleared.
  * - [ACTION_NANOFF] — the **Wi-Fi Aware switch** Diagnostics offers in debug builds (`SettingsStore.debugNanOff`).
+ * - [ACTION_WIFIHOP] — the **Wi-Fi hop** mode (`off`, `star`, `relay`; ADR 2026-11.tz2v). `--es mode star` turns it on.
  *   `--ez off true` stops the plane (links, responder and session go; the mesh runs on its other radios), `--ez off
  *   false` starts it again, no extras reads. The reply is the stored `off`, `userSwitchOff` (the person's Settings
  *   switch, [ACTION_AWARE], which keeps the plane off as well) and the Wi-Fi Aware row's `health` /
@@ -651,6 +652,10 @@ class DebugBridgeReceiver :
 
                         ACTION_NANOFF -> {
                             handleNanOff(intent)
+                        }
+
+                        ACTION_WIFIHOP -> {
+                            handleWifiHop(intent)
                         }
 
                         ACTION_LOWPOWER -> {
@@ -1695,6 +1700,7 @@ class DebugBridgeReceiver :
             .put("nanMsgPlaneStalledPeakMs", snap.nan.nanMsgPlaneStalledPeakMs)
             .put("nanMsgPlaneCycles", snap.nan.nanMsgPlaneCycles)
             .put("filesSentNan", snap.files.filesSentNan)
+            .put("filesSentHop", snap.files.filesSentHop)
             .put("filesSentBt", snap.files.filesSentBt)
             .put("nanBulkGraceTimeouts", snap.nan.nanBulkGraceTimeouts)
             .put("fastCompactSent", snap.fast.fastCompactSent)
@@ -3943,6 +3949,28 @@ class DebugBridgeReceiver :
             .put("nearby", nan?.nearby ?: JSONObject.NULL)
     }
 
+    /** [ACTION_WIFIHOP]: sets the Wi-Fi hop mode (`off`, `star`, `relay`) and reports that row. */
+    private suspend fun handleWifiHop(intent: Intent): JSONObject {
+        val raw = intent.getStringExtra("mode")
+        if (raw != null) {
+            settings.setWifiHopMode(
+                app.getknit.knit.mesh.wifihop.HopMode
+                    .parse(raw),
+            )
+            delay(NANOFF_SETTLE_MS)
+        }
+        val mode = settings.wifiHopMode.first()
+        val hop = mesh.transportStatuses.value.firstOrNull { it.kind == TransportKind.WifiHop }
+        return JSONObject()
+            .put("status", "ok")
+            .put("mode", mode.name)
+            .put("present", hop != null)
+            .put("health", hop?.health?.name ?: JSONObject.NULL)
+            .put("switchedOff", hop?.switchedOff ?: JSONObject.NULL)
+            .put("linked", hop?.linked ?: JSONObject.NULL)
+            .put("nearby", hop?.nearby ?: JSONObject.NULL)
+    }
+
     /** [ACTION_LOWPOWER]: sets low-power mode's switch, then reports the posture with the Wi-Fi Aware row. */
     private suspend fun handleLowPower(intent: Intent): JSONObject {
         if (intent.hasExtra("on")) {
@@ -4407,6 +4435,7 @@ class DebugBridgeReceiver :
         const val ACTION_AWARE = "app.getknit.knit.debug.AWARE"
         const val ACTION_BLECAP = "app.getknit.knit.debug.BLECAP"
         const val ACTION_NANOFF = "app.getknit.knit.debug.NANOFF"
+        const val ACTION_WIFIHOP = "app.getknit.knit.debug.WIFIHOP"
         const val ACTION_LOWPOWER = "app.getknit.knit.debug.LOWPOWER"
         const val ACTION_PHY = "app.getknit.knit.debug.PHY"
         const val ACTION_LINKTUNE = "app.getknit.knit.debug.LINKTUNE"

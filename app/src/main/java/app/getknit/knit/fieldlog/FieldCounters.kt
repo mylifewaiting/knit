@@ -39,6 +39,7 @@ object FieldCounters {
             }
             with(s.files) {
                 put("filesSentNan", filesSentNan)
+                put("filesSentHop", filesSentHop)
                 put("filesSentBt", filesSentBt)
                 put("blobAsksHandled", blobAsksHandled)
                 put("carrierPullsDeferred", carrierPullsDeferred)

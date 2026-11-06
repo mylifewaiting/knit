@@ -163,6 +163,8 @@ if one ever happens they all ride it together and no single item has to justify 
 > Bit 2 is `FLAG_AWARE` (GitHub #44, ADR 2026-10.2t49's 2026-10-27 amendment): "count on my Wi-Fi Aware now",
 > positive, so an advert from a build that predates it never makes a peer an Aware candidate. Additive like the
 > others; main builds from 2026-10-24 to 2026-10-27 wrote it with the opposite meaning, which never shipped.
+> Bit 3 is `FLAG_WIFI_HOP` (ADR 2026-11.tz2v): "I will join a Wi-Fi Direct hop group". Same rule: a parser that
+> does not know the bit ignores it, and a build that predates it is not elected.
 > The value that payload characteristic serves (`DoorbellPolicy.PAYLOAD_UUID`) is the same 24-byte advert
 > payload with the digest cue zeroed, so it grows under the same rules as the advert.
 

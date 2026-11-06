@@ -47,7 +47,7 @@ enum class TransportHealth { Healthy, ForegroundOnly, Degraded, Unavailable }
  * [Other] is the default for fakes / the demo transport, which have no real radio. [DirectLink] is no radio at all:
  * a contact's direct Internet link (`mesh/inet/DirectLinkTransport`, ADR 2026-10.a5yj), never nearby, never met.
  */
-enum class TransportKind { Bluetooth, WifiAware, LoRa, Other, DirectLink }
+enum class TransportKind { Bluetooth, WifiAware, WifiHop, LoRa, Other, DirectLink }
 
 /**
  * A per-radio status line for the Diagnostics screen, produced by [CompositeMeshTransport.statuses]. [linked]

@@ -136,6 +136,11 @@ Bluetooth-adjacent routing that lives in another subsystem's file under `.agents
   window's token taken before an off edge never writes at its end. A refused data write is re-pushed on the next
   reassert, never in a loop. Tests: `AwareCandidateTrackerTest`, `AwareFlagTest`, `NewcomerWatchTest`,
   `BleEndOfWindowTest`, `BleAdvertiserTest`, `BleAdvertPayloadTest`.
+- **When touching `BleAdvertPayload.FLAG_WIFI_HOP` / `wifiHop` in `flags` / `advert`, or
+  `BluetoothMeshTransport.wifiHopPeers` / `wifiHopAdvert`:** READ ADR 2026-11.tz2v and
+  `.agents/context/wifi-hop.md`. Bit 3, set only while the hop mode is on, cleared on the next advert with no
+  debounce. A sighting without the bit forgets the peer at once. The hop plane elects over `wifiHopPeers`.
+  Test: `BleAdvertPayloadTest`, `WifiHopSightingsTest`.
 - **When touching `BleAdvertiser.reassert` / `onAdvertisingEnabled`, `AdvertReassertPolicy`, or the transport's
   `advertLoop` / ACL edge receiver:** READ ADR 2026-10.9utz. The stack re-enables its advertising sets around every
   connection and the controller can refuse that (0x0d), reporting it only for a connection *to* the set — never for

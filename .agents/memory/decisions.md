@@ -314,5 +314,6 @@ carries; never renumber an old one.
 | [2026-11.nsbf](decisions/2026-11-nsbf-a-block-also-holds-a-person-s-profile-presentation.md) | A block also holds a person's profile presentation | moderation, privacy, security, profile, contacts |
 | [2026-11.pk9u](decisions/2026-11-pk9u-chat-menus.md) | Chat menus, sheets and confirmations draw in the chat's own window | ui |
 | [2026-11.sfms](decisions/2026-11-sfms-a-reset-the-replacement-floor-refuses-is-re-opened-when-the-floor-ends.md) | A reset the replacement floor refuses is re-opened when the floor ends | crypto, pfs, recovery |
+| [2026-11.tz2v](decisions/2026-11-tz2v-wi-fi-direct-carries-the-mesh-where-wi-fi-aware-cannot.md) | Wi-Fi Direct carries the mesh where Wi-Fi Aware cannot | wifi-direct, mesh, transport |
 | [2026-11.vdx4](decisions/2026-11-vdx4-a-uri-another-app-hands-knit-is-read-only-through-someone-else-s-provider.md) | A URI another app hands Knit is read only through someone else's provider | security, attachments, privacy |
 | [2026-11.zmc6](decisions/2026-11-zmc6-a-release-build-fails-on-an-r8-cast-to-a-class-newer-than-minsdk.md) | a release build fails on an R8 cast to a class newer than minSdk | build, release, r8 |

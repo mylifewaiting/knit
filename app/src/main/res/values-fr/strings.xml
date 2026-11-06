@@ -1110,6 +1110,7 @@
     <string name="diagnostics_none_transports">Aucun transport actif</string>
     <string name="diagnostics_transport_bluetooth">Bluetooth</string>
     <string name="diagnostics_transport_wifi_aware">Wi-Fi Aware</string>
+    <string name="diagnostics_transport_wifi_hop">Wi-Fi hop</string>
     <string name="diagnostics_transport_other">Autre</string>
     <string name="diagnostics_transport_lora">LoRa</string>
     <string name="diagnostics_transport_direct_link">Connexion directe</string>
@@ -1125,6 +1126,7 @@
     <string name="diagnostics_transport_lora_down">Carte non connectée</string>
     <string name="diagnostics_tag_ble">BLE</string>
     <string name="diagnostics_tag_nan">NAN</string>
+    <string name="diagnostics_tag_hop">Hop</string>
     <string name="diagnostics_tag_lora">LoRa</string>
     <string name="diagnostics_tag_spool">Internet</string>
     <string name="diagnostics_tag_via">via %1$s</string>
@@ -1141,6 +1143,11 @@
     <string name="diagnostics_ble_link_cap_increase">Plus de liaisons Bluetooth</string>
     <string name="diagnostics_nan_switch_label">Wi-Fi Aware (débogage)</string>
     <string name="diagnostics_nan_switch_body">Désactivez-le pour faire fonctionner le réseau mesh en Bluetooth seul. Il reste désactivé après un redémarrage jusqu’à ce que vous le réactiviez.</string>
+    <string name="diagnostics_hop_label">Wi-Fi hop</string>
+    <string name="diagnostics_hop_body">Fait passer le trafic du réseau mesh par Wi-Fi Direct sur les téléphones sans Wi-Fi Aware. Étoile garde un groupe tant que des téléphones en Wi-Fi hop sont à proximité. Relais alterne les liens pour qu’un téléphone au milieu fasse suivre les messages. Un transfert de fichier ou un appel rend la radio.</string>
+    <string name="diagnostics_hop_off">Désactivé</string>
+    <string name="diagnostics_hop_star">Étoile</string>
+    <string name="diagnostics_hop_relay">Relais</string>
     <string name="diagnostics_direct_calls_switch_label">Appels Wi-Fi Direct (débogage)</string>
     <string name="diagnostics_direct_calls_switch_body">Désactivez-les pour passer les appels avec un téléphone à proximité par le chemin Internet, STUN et TURN, comme s’il était loin. Le réglage s’applique au prochain appel ; ils restent désactivés jusqu’à ce que vous les réactiviez.</string>
     <string name="diagnostics_walkie_clips_label">Enregistrer les extraits walkie-talkie (débogage)</string>

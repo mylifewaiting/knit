@@ -363,6 +363,7 @@ class MeshMetrics {
     private val nanMsgPlaneStalledPeakMs = AtomicLong()
     private val nanMsgPlaneCycles = AtomicLong()
     private val filesSentNan = AtomicLong()
+    private val filesSentHop = AtomicLong()
     private val filesSentBt = AtomicLong()
     private val nanBulkGraceTimeouts = AtomicLong()
     private val fastOnlyDropped = AtomicLong()
@@ -1064,6 +1065,8 @@ class MeshMetrics {
         when (transport) {
             TransportKind.WifiAware -> filesSentNan.incrementAndGet()
 
+            TransportKind.WifiHop -> filesSentHop.incrementAndGet()
+
             TransportKind.Bluetooth -> filesSentBt.incrementAndGet()
 
             TransportKind.LoRa -> Unit
@@ -1598,6 +1601,7 @@ class MeshMetrics {
     fun files(): Snapshot.Files =
         Snapshot.Files(
             filesSentNan = filesSentNan.get(),
+            filesSentHop = filesSentHop.get(),
             filesSentBt = filesSentBt.get(),
             blobAsksHandled = blobAsksHandled.get(),
             carrierPullsDeferred = carrierPullsDeferred.get(),
@@ -1881,6 +1885,7 @@ class MeshMetrics {
         /** Blobs over the radio links: files sent on each plane, blob asks handled, and cut transfers resumed (#116). */
         data class Files(
             val filesSentNan: Long = 0,
+            val filesSentHop: Long = 0,
             val filesSentBt: Long = 0,
             val blobAsksHandled: Long = 0,
             val carrierPullsDeferred: Long = 0,

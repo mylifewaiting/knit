@@ -717,6 +717,12 @@ carries `-f 0x20` (`FLAG_INCLUDE_STOPPED_PACKAGES`); `scripts/bridge.sh` always 
   Bluetooth row's `linked` / `nearby`. It persists across restarts (a `debug_` key, never in a backup) until
   cleared. The transport sheds the weakest links once they are 20 s old and refuses a dialer that would add one
   (`bt refused client <id> (… atCap=true)`); the side channel still reaches unlinked peers, and NAN is untouched.
+- `…debug.WIFIHOP` — the **Wi-Fi hop** mode (ADR 2026-11.tz2v; `SettingsStore.wifiHopMode`, also the control under
+  Diagnostics' Transports). `--es mode off|star|relay` sets it, no extras reads. `star` is one Wi-Fi Direct group
+  (the lowest hop id hosts); `relay` alternates links once a minute so a phone in the middle of a line can pass
+  traffic on. The reply carries `mode` (`OFF`, `STAR`, `RELAY`), `present`, and the hop row's `health`,
+  `switchedOff`, `linked`, `nearby`. Off until set. While it holds the radio, Aware is paused and a transfer or a
+  neighbour call asks it to let go. Log tag `WifiHop`.
 - `…debug.NANOFF` — the **Wi-Fi Aware switch** (debug builds' own; `SettingsStore.debugNanOff`, also a switch under
   Diagnostics' Transports), for running the mesh on Bluetooth alone without touching the phone's Wi-Fi. `--ez off true`
   stops the plane (its links, responder and session go, `neighbors`/`reachable` empty, the composite's file route

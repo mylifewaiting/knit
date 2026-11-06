@@ -62,6 +62,7 @@ import app.getknit.knit.mesh.protocol.Protocol
 import app.getknit.knit.mesh.protocol.RelayEnvelope
 import app.getknit.knit.mesh.protocol.WireCodec
 import app.getknit.knit.mesh.protocol.WireEnvelope
+import app.getknit.knit.mesh.wifihop.WifiHopSightings
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -170,6 +171,8 @@ class BluetoothMeshTransport(
     // shared with the Wi-Fi Aware plane and the inbound pipeline, which keep the counters and the refusal lines.
     private val claims: LinkClaims,
     private val prover: LinkProver,
+    // Wi-Fi hop mode (ADR 2026-11.tz2v): the advert's FLAG_WIFI_HOP, so only a phone that will join is elected.
+    private val wifiHopAdvert: StateFlow<Boolean> = MutableStateFlow(false),
 ) : MeshTransport {
     private val appContext = context.applicationContext
     private val bluetoothManager = appContext.getSystemService(BluetoothManager::class.java)
@@ -414,6 +417,12 @@ class BluetoothMeshTransport(
     // dormant Aware plane) and heard (keeps it attached), published with [reachable] and [near] from one snapshot.
     // [seesNewcomers]: the last presence window's scan really ran, with the adapter on — false at once on its end.
     private val awareCandidates = AwareCandidateTracker()
+
+    // Phones whose advert says they will join a Wi-Fi hop group (ADR 2026-11.tz2v). The hop plane elects over this.
+    private val wifiHopSightings = WifiHopSightings()
+
+    /** Hop peers heard on Bluetooth. Empty while the mode is off everywhere nearby. */
+    val wifiHopPeers: StateFlow<Set<String>> = wifiHopSightings.peers
     private val _awareCandidatesNear = MutableStateFlow<Set<String>>(emptySet())
     override val awareCandidatesNear = _awareCandidatesNear.asStateFlow()
     private val _awareCandidatesHeard = MutableStateFlow<Set<String>>(emptySet())
@@ -509,6 +518,7 @@ class BluetoothMeshTransport(
     private var connectJob: Job? = null
     private var cueJob: Job? = null
     private var awareJob: Job? = null
+    private var hopAdvertJob: Job? = null
     private var powerJob: Job? = null
     private var diagJob: Job? = null
     private var audioJob: Job? = null
@@ -648,6 +658,7 @@ class BluetoothMeshTransport(
                 }
             // FLAG_AWARE (GitHub #44): cleared at once, set after a wall-clock minute of "will run"; each move re-advertises in place.
             awareJob = scope.launch { AwareFlag.follow(awareWontRun, { awareAdvertised }, ::setAware, elapsedWait::sleep) }
+            watchHopAdvert()
             powerJob = scope.launch { powerState.state.drop(1).collect { onPowerChange() } }
             diagJob = scope.launch { diagLoop() }
             advertJob = scope.launch { advertLoop() }
@@ -701,6 +712,7 @@ class BluetoothMeshTransport(
         connectJob?.cancel()
         cueJob?.cancel()
         awareJob?.cancel()
+        hopAdvertJob?.cancel()
         powerJob?.cancel()
         diagJob?.cancel()
         audioJob?.cancel()
@@ -720,6 +732,7 @@ class BluetoothMeshTransport(
         cancelGattRead()
         sideCapable.clear()
         awareCandidates.clear()
+        wifiHopSightings.clear()
         unregisterAvailability()
         unregisterAclEdges()
         audioMonitor.stop()
@@ -1068,6 +1081,7 @@ class BluetoothMeshTransport(
                 sideLive = sideChannel?.live == true,
                 gattPeers = gattPeers,
                 aware = awareAdvertised,
+                wifiHop = wifiHopAdvert.value,
             )
         advertiser.update(payload)
         // The same bytes on the Coded set, so its PSM and cue can never lag the presence advert's.
@@ -1077,6 +1091,17 @@ class BluetoothMeshTransport(
         } else if (!codedOn()) {
             stopCodedAdvert()
         }
+    }
+
+    /** FLAG_WIFI_HOP follows the mode with no debounce: off clears the bit on the next advert (ADR 2026-11.tz2v). */
+    private fun watchHopAdvert() {
+        hopAdvertJob =
+            scope.launch {
+                wifiHopAdvert.drop(1).distinctUntilChanged().collect {
+                    Log.i(TAG, "bt advert wifiHop=$it")
+                    readvertise()
+                }
+            }
     }
 
     /**
@@ -2331,6 +2356,8 @@ class BluetoothMeshTransport(
         )
         // Before the publish, which reads it: only service data carries the bit; a GATT payload's is no evidence.
         if (viaGatt) awareCandidates.forget(parsed.nodeId) else awareCandidates.note(parsed.nodeId, parsed.aware, !coded, elapsed())
+        // A hop peer only while its advert says so (ADR 2026-11.tz2v). A clear bit drops it before the linger.
+        wifiHopSightings.note(parsed.nodeId, parsed.wifiHop, elapsed())
         publishReachable()
         if (sideChannel != null) {
             // The audience, not anyCapable: a flagged peer appearing beside an all-linked clique must wake the loop.
@@ -3365,6 +3392,7 @@ class BluetoothMeshTransport(
                             codedDeviceFor.clear()
                             sideCapable.clear()
                             awareCandidates.clear()
+                            wifiHopSightings.clear()
                             synchronized(lock) {
                                 inFlight.clear()
                                 backoffs.clear()
@@ -3566,6 +3594,7 @@ class BluetoothMeshTransport(
                 awareLogged = sets
                 Log.d(TAG, "bt aware candidates near=${sets.near} heard=${sets.heard}")
             }
+            wifiHopSightings.prune(now)
         }
     }
 

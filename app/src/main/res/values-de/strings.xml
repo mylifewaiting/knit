@@ -1089,6 +1089,7 @@
     <string name="diagnostics_none_transports">Keine aktiven Übertragungswege</string>
     <string name="diagnostics_transport_bluetooth">Bluetooth</string>
     <string name="diagnostics_transport_wifi_aware">Wi-Fi Aware</string>
+    <string name="diagnostics_transport_wifi_hop">Wi-Fi hop</string>
     <string name="diagnostics_transport_other">Sonstige</string>
     <string name="diagnostics_transport_lora">LoRa</string>
     <string name="diagnostics_transport_direct_link">Direktverbindung</string>
@@ -1103,6 +1104,7 @@
     <string name="diagnostics_transport_lora_down">Board nicht verbunden</string>
     <string name="diagnostics_tag_ble">BLE</string>
     <string name="diagnostics_tag_nan">NAN</string>
+    <string name="diagnostics_tag_hop">Hop</string>
     <string name="diagnostics_tag_lora">LoRa</string>
     <string name="diagnostics_tag_spool">Internet</string>
     <string name="diagnostics_tag_via">über %1$s</string>
@@ -1119,6 +1121,11 @@
     <string name="diagnostics_ble_link_cap_increase">Mehr Bluetooth-Verbindungen</string>
     <string name="diagnostics_nan_switch_label">Wi-Fi Aware (Debug)</string>
     <string name="diagnostics_nan_switch_body">Schalte es aus, um das Mesh-Netzwerk nur über Bluetooth zu betreiben. Bleibt auch nach einem Neustart aus, bis du es wieder einschaltest.</string>
+    <string name="diagnostics_hop_label">Wi-Fi hop</string>
+    <string name="diagnostics_hop_body">Trägt den Mesh-Verkehr über Wi-Fi Direct auf Telefonen ohne Wi-Fi Aware. Stern hält eine Gruppe, solange Telefone mit Wi-Fi hop in der Nähe sind. Staffel wechselt die Verbindungen, damit ein Telefon in der Mitte Nachrichten weitergibt. Eine Dateiübertragung oder ein Anruf gibt das Radio zurück.</string>
+    <string name="diagnostics_hop_off">Aus</string>
+    <string name="diagnostics_hop_star">Stern</string>
+    <string name="diagnostics_hop_relay">Staffel</string>
     <string name="diagnostics_direct_calls_switch_label">Wi-Fi-Direct-Anrufe (Debug)</string>
     <string name="diagnostics_direct_calls_switch_body">Schalte es aus, um Anrufe mit einem Smartphone in der Nähe über den Internetweg mit STUN und TURN zu führen, als wäre es weit weg. Gilt ab dem nächsten Anruf und bleibt aus, bis du es wieder einschaltest.</string>
     <string name="diagnostics_walkie_clips_label">Walkie-Clips speichern (Debug)</string>

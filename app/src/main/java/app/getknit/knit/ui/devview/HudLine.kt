@@ -149,6 +149,7 @@ object HudLine {
         when (kind) {
             TransportKind.Bluetooth -> "BLE"
             TransportKind.WifiAware -> "NAN"
+            TransportKind.WifiHop -> "Hop"
             TransportKind.LoRa -> "LoRa"
             TransportKind.Other -> "other"
             TransportKind.DirectLink -> "link"

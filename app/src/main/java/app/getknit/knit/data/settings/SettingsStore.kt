@@ -14,6 +14,7 @@ import app.getknit.knit.mesh.bluetooth.CodedPhyMode
 import app.getknit.knit.mesh.bluetooth.PromotionConfig
 import app.getknit.knit.mesh.spool.SpoolTicketJournal
 import app.getknit.knit.mesh.spool.StoredSpoolTicket
+import app.getknit.knit.mesh.wifihop.HopMode
 import app.getknit.knit.ui.theme.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -507,6 +508,13 @@ class SettingsStore(
         dataStore.data.map { prefs -> BuildConfig.DEBUG && prefs[KEY_DEBUG_NAN_OFF] == true }
 
     /**
+     * Wi-Fi Direct as a mesh plane where Wi-Fi Aware is missing (ADR 2026-11.tz2v). Off unless Diagnostics or
+     * `…debug.WIFIHOP` sets it. Not gated on [BuildConfig.DEBUG]: a release build on a phone with no Aware shows
+     * the same control. The `debug_` prefix keeps it out of a backup.
+     */
+    val wifiHopMode: Flow<HopMode> = dataStore.data.map { prefs -> HopMode.parse(prefs[KEY_WIFI_HOP_MODE]) }
+
+    /**
      * Whether the debug build's calls skip the Wi-Fi Direct leg (ADR 2026-10.kxnw), so a call between neighbours
      * goes over ICE alone — host, STUN and TURN — the way it would between strangers. Set from Diagnostics; read by
      * `DirectCallPath`. Gated on `BuildConfig.DEBUG` like [debugNanOff]; the `debug_` prefix keeps it out of a backup.
@@ -822,6 +830,12 @@ class SettingsStore(
             }
         }
 
+    /** Sets [wifiHopMode]. [HopMode.OFF] clears the key. */
+    suspend fun setWifiHopMode(mode: HopMode) =
+        dataStore.edit {
+            if (mode == HopMode.OFF) it.remove(KEY_WIFI_HOP_MODE) else it[KEY_WIFI_HOP_MODE] = mode.name
+        }
+
     /** Sets [debugNanOff]; on (false) clears the key. */
     suspend fun setDebugNanOff(off: Boolean) =
         dataStore.edit {
@@ -1134,6 +1148,7 @@ class SettingsStore(
         val KEY_DEBUG_BLE_LINK_CAP = intPreferencesKey("debug_ble_link_cap")
         val KEY_DEBUG_BLE_PHY_MODE = stringPreferencesKey("debug_ble_phy_mode")
         val KEY_DEBUG_NAN_OFF = booleanPreferencesKey("debug_nan_off")
+        val KEY_WIFI_HOP_MODE = stringPreferencesKey("debug_wifi_hop_mode")
         val KEY_DEBUG_DIRECT_CALLS_OFF = booleanPreferencesKey("debug_direct_calls_off")
         val KEY_DEBUG_WALKIE_CLIPS = booleanPreferencesKey("debug_walkie_clips")
         val KEY_DEBUG_DEV_VIEW = booleanPreferencesKey("debug_dev_view")

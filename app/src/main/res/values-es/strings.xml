@@ -1110,6 +1110,7 @@
     <string name="diagnostics_none_transports">No hay transportes activos</string>
     <string name="diagnostics_transport_bluetooth">Bluetooth</string>
     <string name="diagnostics_transport_wifi_aware">Wi-Fi Aware</string>
+    <string name="diagnostics_transport_wifi_hop">Wi-Fi hop</string>
     <string name="diagnostics_transport_other">Otro</string>
     <string name="diagnostics_transport_lora">LoRa</string>
     <string name="diagnostics_transport_direct_link">Enlace directo</string>
@@ -1125,6 +1126,7 @@
     <string name="diagnostics_transport_lora_down">Placa no conectada</string>
     <string name="diagnostics_tag_ble">BLE</string>
     <string name="diagnostics_tag_nan">NAN</string>
+    <string name="diagnostics_tag_hop">Hop</string>
     <string name="diagnostics_tag_lora">LoRa</string>
     <string name="diagnostics_tag_spool">Internet</string>
     <string name="diagnostics_tag_via">vía %1$s</string>
@@ -1141,6 +1143,11 @@
     <string name="diagnostics_ble_link_cap_increase">Más enlaces Bluetooth</string>
     <string name="diagnostics_nan_switch_label">Wi-Fi Aware (depuración)</string>
     <string name="diagnostics_nan_switch_body">Desactívalo para usar la mesh solo con Bluetooth. Sigue desactivado después de reiniciar hasta que vuelvas a activarlo.</string>
+    <string name="diagnostics_hop_label">Wi-Fi hop</string>
+    <string name="diagnostics_hop_body">Lleva el tráfico de la mesh por Wi-Fi Direct en teléfonos sin Wi-Fi Aware. Estrella mantiene un grupo mientras hay teléfonos con Wi-Fi hop cerca. Relevo alterna los enlaces para que un teléfono en el medio reenvíe los mensajes. Una transferencia de archivo o una llamada devuelve la radio.</string>
+    <string name="diagnostics_hop_off">Desactivado</string>
+    <string name="diagnostics_hop_star">Estrella</string>
+    <string name="diagnostics_hop_relay">Relevo</string>
     <string name="diagnostics_direct_calls_switch_label">Llamadas por Wi-Fi Direct (depuración)</string>
     <string name="diagnostics_direct_calls_switch_body">Desactívalo para hacer las llamadas con un teléfono cercano por la ruta de Internet, STUN y TURN, como si estuviera lejos. Se aplica a la próxima llamada y sigue desactivado hasta que vuelvas a activarlo.</string>
     <string name="diagnostics_walkie_clips_label">Guardar clips del walkie (depuración)</string>

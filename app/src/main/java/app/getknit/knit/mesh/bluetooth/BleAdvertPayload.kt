@@ -15,8 +15,8 @@ import java.nio.ByteBuffer
  * bytes 1..16  nodeId, 16 raw bytes (NodeId.BYTES = 128 bits), decoded to the 26-char id via NodeId.fromBytes
  * bytes 17..20 digest cue = low 32 bits of StoreDigest.version (BE) — both BLE peers truncate identically
  * bytes 21..22 L2CAP PSM (unsigned 16-bit, BE) so an initiator knows which channel to connect to
- * byte 23      BLE-local flags: bit 0 [FLAG_SIDE_CHANNEL], bit 1 [FLAG_DIALS_GATT_PEERS], bit 2 [FLAG_AWARE];
- *              bits 3..7 reserved (0). Optional on the wire: a build before it advertised 23 bytes, and this parser
+ * byte 23      BLE-local flags: bit 0 [FLAG_SIDE_CHANNEL], bit 1 [FLAG_DIALS_GATT_PEERS], bit 2 [FLAG_AWARE],
+ *              bit 3 [FLAG_WIFI_HOP]; bits 4..7 reserved (0). Optional on the wire: a build before it advertised 23 bytes, and this parser
  *              reads a missing byte as 0. Every shipped parser tests only the bits it knows, so a new bit is additive.
  * ```
  *
@@ -72,18 +72,27 @@ internal object BleAdvertPayload {
     const val FLAG_AWARE = 0x04
 
     /**
+     * This phone will form Wi-Fi Direct hop groups (ADR 2026-11.tz2v). Set only while that mode is on, so a peer
+     * elects over phones that will actually join. A build that predates the bit never sets it and is not a hop peer.
+     */
+    const val FLAG_WIFI_HOP = 0x08
+
+    /**
      * The flags byte this node advertises: [FLAG_SIDE_CHANNEL] while its side channel is [sideLive],
-     * [FLAG_DIALS_GATT_PEERS] while its GATT reader runs ([gattPeers]), so it never claims a read it cannot make, and
-     * [FLAG_AWARE] while a peer may count on this phone's Wi-Fi Aware ([aware]).
+     * [FLAG_DIALS_GATT_PEERS] while its GATT reader runs ([gattPeers]), so it never claims a read it cannot make,
+     * [FLAG_AWARE] while a peer may count on this phone's Wi-Fi Aware ([aware]), and [FLAG_WIFI_HOP] while the
+     * Wi-Fi hop mode is on ([wifiHop]).
      */
     fun flags(
         sideLive: Boolean,
         gattPeers: Boolean,
         aware: Boolean,
+        wifiHop: Boolean = false,
     ): Int =
         (if (sideLive) FLAG_SIDE_CHANNEL else 0) or
             (if (gattPeers) FLAG_DIALS_GATT_PEERS else 0) or
-            (if (aware) FLAG_AWARE else 0)
+            (if (aware) FLAG_AWARE else 0) or
+            (if (wifiHop) FLAG_WIFI_HOP else 0)
 
     /** This node's presence advert, [encode] over [flags]: the bytes `BluetoothMeshTransport.readvertise` puts on air. */
     fun advert(
@@ -94,7 +103,8 @@ internal object BleAdvertPayload {
         sideLive: Boolean,
         gattPeers: Boolean,
         aware: Boolean,
-    ): ByteArray = encode(nodeId, capabilities, digestVersion, psm, flags(sideLive, gattPeers, aware))
+        wifiHop: Boolean = false,
+    ): ByteArray = encode(nodeId, capabilities, digestVersion, psm, flags(sideLive, gattPeers, aware, wifiHop))
 
     private const val CAP_MASK = 0xFFL
     private const val PSM_MASK = 0xFFFF
@@ -117,6 +127,9 @@ internal object BleAdvertPayload {
          * released build's (2.10.0 and older).
          */
         val aware: Boolean get() = flags and FLAG_AWARE != 0
+
+        /** Whether the advert says this phone is running the Wi-Fi hop (ADR 2026-11.tz2v). */
+        val wifiHop: Boolean get() = flags and FLAG_WIFI_HOP != 0
     }
 
     fun encode(
